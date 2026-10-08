@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Activity 6</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="books.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .search-container {
+            margin-bottom: 20px;
+        }
+        .search-input {
+            padding: 8px;
+            width: 300px;
+            font-size: 14px;
+        }
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .book-card {
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .book-card img {
+            height: 150px;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+        .book-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .book-author {
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .book-price {
+            font-weight: bold;
+            color: #2a7ae9;
+            margin-bottom: 10px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 5px;
+        }
+        button {
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+        .modal-content img {
+            height: 180px;
+            object-fit: cover;
+            margin-bottom: 15px;
+        }
+        .cart-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div class="header">
+        <h1><i class="fa fa-book"></i> Online Bookshop</h1>
+        <button @click="toggleCart">
+            <i class="fa fa-shopping-cart"></i> {{ showCart ? 'Books' : 'Cart (' + cartCount + ')' }}
+        </button>
+    </div>
+
+    <p v-if="orderSuccess"><i class="fa fa-check"></i> Order placed successfully.</p>
+
+    <div v-if="previewBook" class="modal-overlay" @click.self="closePreview">
+        <div class="modal-content">
+            <h2><i class="fa fa-eye"></i> Book Preview</h2>
+            <img :src="previewBook.image" :alt="previewBook.title">
+            <h3>{{ previewBook.title }}</h3>
+            <p><strong>Author:</strong> {{ previewBook.author }}</p>
+            <p><strong>Price:</strong> Rs {{ previewBook.price }}</p>
+            <p>{{ previewBook.description }}</p>
+            <div class="btn-group" style="justify-content: center;">
+                <button @click="addToCart(previewBook)"><i class="fa fa-plus"></i> Add to Cart</button>
+                <button @click="closePreview"><i class="fa fa-times"></i> Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="!showCart">
+        <div class="search-container">
+            <i class="fa fa-search"></i>
+            <input type="text" v-model="searchQuery" placeholder="Search books" class="search-input">
+        </div>
+
+        <h2>Books</h2>
+        <div class="books-grid">
+            <div v-for="book in filteredBooks" :key="book.id" class="book-card">
+                <img :src="book.image" :alt="book.title">
+                <div class="book-title">{{ book.title }}</div>
+                <div class="book-author">by {{ book.author }}</div>
+                <div class="book-price">Rs {{ book.price }}</div>
+                <div class="btn-group">
+                    <button @click="setPreview(book)"><i class="fa fa-eye"></i> Preview</button>
+                    <button @click="addToCart(book)"><i class="fa fa-plus"></i> Add to Cart</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div v-else>
+        <h2><i class="fa fa-shopping-cart"></i> Cart</h2>
+        <p v-if="cart.length === 0">Cart is empty</p>
+        <div v-else class="cart-list">
+            <div v-for="(item, index) in cart" :key="item.id" class="cart-item">
+                <img :src="item.image" :alt="item.title" width="40">
+                <div>
+                    <strong>{{ item.title }}</strong> by {{ item.author }} - Rs {{ item.price }}
+                    <span v-if="item.quantity > 1">({{ item.quantity }})</span>
+                </div>
+                <button @click="removeFromCart(index)"><i class="fa fa-trash"></i> Remove</button>
+            </div>
+        </div>
+
+        <p><strong>Total: Rs {{ totalPrice }}</strong></p>
+
+        <button :disabled="cart.length === 0" @click="checkout"><i class="fa fa-check"></i> Checkout</button>
+    </div>
+</div>
+
+<script>
+    const { createApp } = Vue;
+
+    createApp({
+        data() {
+            return {
+                searchQuery: '',
+                showCart: false,
+                orderSuccess: false,
+                previewBook: null,
+                books: booksData,
+                cart: []
+            };
+        },
+        computed: {
+            filteredBooks() {
+                return this.books.filter(book =>
+                    book.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                    book.author.toLowerCase().includes(this.searchQuery.toLowerCase())
+                );
+            },
+            cartCount() {
+                return this.cart.reduce((sum, item) => sum + item.quantity, 0);
+            },
+            totalPrice() {
+                return this.cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2);
+            }
+        },
+        methods: {
+            toggleCart() {
+                this.showCart = !this.showCart;
+            },
+            setPreview(book) {
+                this.previewBook = book;
+            },
+            closePreview() {
+                this.previewBook = null;
+            },
+            addToCart(book) {
+                const item = this.cart.find(i => i.id === book.id);
+                if (item) {
+                    item.quantity++;
+                } else {
+                    this.cart.push({ id: book.id, title: book.title, author: book.author, price: book.price, image: book.image, quantity: 1 });
+                }
+                this.orderSuccess = false;
+            },
+            removeFromCart(index) {
+                if (this.cart[index].quantity > 1) {
+                    this.cart[index].quantity--;
+                } else {
+                    this.cart.splice(index, 1);
+                }
+            },
+            checkout() {
+                this.cart = [];
+                this.showCart = false;
+                this.orderSuccess = true;
+            }
+        }
+    }).mount('#app');
+</script>
+
+</body>
+</html>
