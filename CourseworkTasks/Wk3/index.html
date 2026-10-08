@@ -15,7 +15,8 @@
         <h1>Coursework Front-End</h1>
 
         <button v-bind:disabled="numberOfItems === 0" @click="toggleCart">
-            <i class="fa fa-shopping-cart"></i> Checkout ({{ numberOfItems }})
+            <template v-if="!displayCart">Checkout ({{ numberOfItems }})</template>
+            <template v-else>Lessons</template>
         </button>
 
         <div v-if="!displayCart">
@@ -34,12 +35,20 @@
 
         <div v-else>
             <h2>Checkout Page</h2>
+            <h3>Cart</h3>
             <p>Items in cart: {{ numberOfItems }}</p>
             <ul>
                 <li v-for="(itemId, index) in cart" :key="index">
                     Lesson ID: {{ itemId }}
                 </li>
             </ul>
+
+            <h3>Order Details</h3>
+            <p>Customer Name: <input v-model="order.customerName"></p>
+            <p>Email: <input v-model="order.email"></p>
+            <p>Phone: <input v-model="order.phone"></p>
+
+            <button @click="checkout" v-bind:disabled="!canCheckout">Place Order</button>
         </div>
     </div>
 
@@ -89,12 +98,24 @@
                             altText: "UI/UX Design lesson image"
                         },
 
-                    ]
+                    ],
+                    order: {
+                        customerName: "",
+                        email: "",
+                        phone: ""
+                    }
                 }
             },
             computed: {
                 numberOfItems() {
                     return this.cart.length;
+                },
+
+                canCheckout() {
+                    return this.cart.length > 0 &&
+                        this.order.customerName &&
+                        this.order.email &&
+                        this.order.phone;
                 }
             },
             methods: {
@@ -111,6 +132,17 @@
 
                 toggleCart() {
                     this.displayCart = !this.displayCart;
+                },
+
+                checkout() {
+                    if (this.canCheckout) {
+                        alert("Order has been placed successfully!");
+                        this.cart = [];
+                        this.order.customerName = "";
+                        this.order.email = "";
+                        this.order.phone = "";
+                        this.displayCart = false;
+                    }
                 }
             }
         });
