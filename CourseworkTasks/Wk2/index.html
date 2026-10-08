@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coursework - Lessons & Shopping Cart</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+
+    <div id="app">
+        <h1>Coursework Front-End</h1>
+
+        <button v-bind:disabled="numberOfItems === 0" @click="toggleCart">
+            <i class="fa fa-shopping-cart"></i> Checkout ({{ numberOfItems }})
+        </button>
+
+        <div v-if="!displayCart">
+            <h2>{{ lesson.subject }}</h2>
+            <p>Location: {{ lesson.location }}</p>
+            <p>Price: £{{ lesson.price }}</p>
+            <p>Spaces Available: {{ lesson.availability }}</p>
+            <img v-bind:src="lesson.image" v-bind:alt="lesson.altText" width="300">
+            <br><br>
+            <button v-bind:disabled="!canAddToCart" @click="addToCart">
+                Add to Cart
+            </button>
+        </div>
+
+        <div v-else>
+            <h2>Checkout Page</h2>
+            <p>Items in cart: {{ numberOfItems }}</p>
+            <ul>
+                <li v-for="(itemId, index) in cart" :key="index">
+                    Lesson ID: {{ itemId }}
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script type="module">
+        const { createApp } = Vue;
+
+        const app = createApp({
+            data() {
+                return {
+                    displayCart: false,
+                    cart: [],
+                    lesson: {
+                        id: 1001,
+                        subject: "Computer Science",
+                        location: "Hendon",
+                        price: 50,
+                        availability: 5,
+                        image: "../images/koalaSmall.jpg",
+                        altText: "Computer Science lesson image"
+                    }
+                }
+            },
+            computed: {
+                canAddToCart() {
+                    return this.lesson.availability > 0;
+                },
+                numberOfItems() {
+                    return this.cart.length;
+                }
+            },
+            methods: {
+                addToCart() {
+                    if (this.canAddToCart) {
+                        this.cart.push(this.lesson.id);
+                        this.lesson.availability = this.lesson.availability - 1;
+                    }
+                },
+                toggleCart() {
+                    this.displayCart = !this.displayCart;
+                }
+            }
+        });
+
+        app.mount("#app");
+    </script>
+
+</body>
+</html>

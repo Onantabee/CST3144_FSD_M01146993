@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coursework - Lessons & Shopping Cart</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+
+<body>
+
+    <div id="app">
+        <h1>Coursework Front-End</h1>
+
+        <h2>{{ lesson.subject }}</h2>
+        <p>Location: {{ lesson.location }}</p>
+        <p>Price: £{{ lesson.price }}</p>
+        <p>Spaces Available: {{ lesson.availability }}</p>
+        <img v-bind:src="lesson.image" v-bind:alt="lesson.altText" width="300">
+
+    </div>
+
+    <script type="module">
+        const { createApp } = Vue;
+
+        const app = createApp({
+            data() {
+                return {
+                    displayCart: false,
+                    cart: [],
+                    lesson: {
+                        id: 1001,
+                        subject: "Computer Science",
+                        location: "Hendon",
+                        price: 50,
+                        availability: 5,
+                        image: "../images/koalaSmall.jpg",
+                        altText: "Computer Science lesson image"
+                    }
+                }
+            }
+        });
+
+        app.mount("#app");
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favourite Albums</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+
+    <div id="app">
+        <h1>{{ headerTitle }}</h1>
+
+        <div v-for="album in albums" :key="album.title">
+            <h2>{{ album.title }}</h2>
+            <p>Artist: {{ album.artist }}</p>
+            <p>Genre: {{ album.genre }}</p>
+            <p>Year: {{ album.year }}</p>
+            <img :src="album.cover" :alt="album.title" width="200">
+            <hr>
+        </div>
+    </div>
+
+    <script type="module">
+        const { createApp } = Vue;
+
+        const app = createApp({
+            data() {
+                return {
+                    headerTitle: "My Favourite Music Albums",
+                    albums: [
+                        {
+                            title: "Dark Side of the Moon",
+                            artist: "Pink Floyd",
+                            genre: "Progressive Rock",
+                            year: 1973,
+                            cover: "../images/koalaSmall.jpg"
+                        },
+                        {
+                            title: "Abbey Road",
+                            artist: "The Beatles",
+                            genre: "Rock / Pop",
+                            year: 1969,
+                            cover: "../images/koalaSmall.jpg"
+                        },
+                        {
+                            title: "Random Access Memories",
+                            artist: "Daft Punk",
+                            genre: "Electronic / Funk",
+                            year: 2013,
+                            cover: "../images/koalaSmall.jpg"
+                        }
+                    ]
+                }
+            }
+        });
+
+        app.mount("#app");
+    </script>
+
+</body>
+</html>

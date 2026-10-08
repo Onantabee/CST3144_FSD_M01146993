@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 2 Bonus Task - Social Media Like Button</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+
+    <div id="app">
+        <h1>Social Media Post</h1>
+        <p>Vue.js interactive post demo</p>
+
+        <div>
+            <button @click="toggleLike">
+                <i :class="isLiked ? 'fa fa-heart' : 'fa fa-heart-o'"></i>
+                <span>{{ likes }} Likes</span>
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        const { createApp } = Vue;
+
+        const app = createApp({
+            data() {
+                return {
+                    likes: 100,
+                    isLiked: false
+                }
+            },
+            methods: {
+                toggleLike() {
+                    if (this.isLiked) {
+                        this.likes = this.likes - 1;
+                        this.isLiked = false;
+                    } else {
+                        this.likes = this.likes + 1;
+                        this.isLiked = true;
+                    }
+                }
+            }
+        });
+
+        app.mount("#app");
+    </script>
+</body>
+</html>
